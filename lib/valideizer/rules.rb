@@ -38,6 +38,7 @@ module Valideizer
       when :regexp        then validate_regexp        param, constraint
       when :length        then validate_length        param, constraint
       when :active_record then validate_active_record param, constraint
+      else true
       end
       rescue
         false
@@ -89,7 +90,7 @@ module Valideizer
     end
 
     def type_check(param, type)
-      res = case type
+      case type
       when :integer then param.is_a? Integer
       when :float   then param.is_a? Float
       when :string  then param.is_a? String

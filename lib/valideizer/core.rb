@@ -31,7 +31,12 @@ module Valideizer
         end if @rules.include? param.to_s
       end
 
-      @errors.empty?
+      if @errors.empty?
+        type_cast params if @type_cast
+        true
+      else
+        false
+      end
     end
 
     def errors
@@ -52,9 +57,19 @@ module Valideizer
     end
 
     def setup_defaults(params)
-      params.each do |param, value|
-        default_rule = @rules[param.to_s]&.find { |r, _c| r == :default }
-        params[param] = default_rule.last if default_rule && value.nil?
+      @rules.each do |param, rules|
+        default_rule = rules.find { |r, _c| r == :default }
+        can_be_defaulted = default_rule && (params[param].nil? || params[param]&.empty?)
+
+        if params.include? param.to_sym
+          param = param.to_sym
+          params[param] = default_rule.last if default_rule && (params[param].nil? || params[param]&.empty?)
+        elsif params.include? param.to_s
+          param = param.to_s
+          params[param] = default_rule.last if default_rule && (params[param].nil? || params[param]&.empty?)
+        else
+          params.merge!(param => default_rule.last) if can_be_defaulted
+        end
       end
     end
 

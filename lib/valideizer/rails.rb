@@ -13,7 +13,7 @@ module Valideizer
         def self.valideize(method, &options_block)
           method = method.to_s
           holder = Valideizer::Holder.instance
-          holder.valideizers[controller_path] = {} if holder.valideizers[controller_name].nil?
+          holder.valideizers[controller_path] = {} if holder.valideizers[controller_path].nil?
 
           # raise "Action #{method} is not defined in #{controller_name}" unless action_methods.include? method.to_s
 
