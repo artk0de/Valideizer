@@ -20,7 +20,7 @@ module Valideizer
       when :ot            then "Should be other than #{constraint}."
       when :range         then "Out of range. Should be in #{constraint.to_s} range."
       when :enum          then "Out of enum. Possible values #{constraint.to_s}."
-      when :type          then "Should be #{constraint} type. Current type: `#{value}`."
+      when :type          then "Should be #{constraint} type. Current type: `#{value.class}`."
       when :array_type    then "Should be array of #{constraint} type."
       when :custom_type   then "Should be #{constraint} type."
       when :regexp        then "Couldn't be matched by #{constraint}."

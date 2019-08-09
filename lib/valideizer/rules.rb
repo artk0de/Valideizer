@@ -21,23 +21,23 @@ module Valideizer
       default
     ]
 
-    def validate(param, rule, constraint)
+    def validate(value, rule, constraint)
       begin
       case rule
-      when :eql           then validate_eql           param, constraint
-      when :gt            then validate_gt            param, constraint
-      when :gte           then validate_gte           param, constraint
-      when :lt            then validate_lt            param, constraint
-      when :lte           then validate_lte           param, constraint
-      when :ot            then validate_ot            param, constraint
-      when :range         then validate_range         param, constraint
-      when :enum          then validate_enum          param, constraint
-      when :type          then validate_type          param, constraint
-      when :array_type    then validate_array_type    param, constraint
-      when :custom_type   then validate_custom_type   param, constraint
-      when :regexp        then validate_regexp        param, constraint
-      when :length        then validate_length        param, constraint
-      when :active_record then validate_active_record param, constraint
+      when :eql           then validate_eql           value, constraint
+      when :gt            then validate_gt            value, constraint
+      when :gte           then validate_gte           value, constraint
+      when :lt            then validate_lt            value, constraint
+      when :lte           then validate_lte           value, constraint
+      when :ot            then validate_ot            value, constraint
+      when :range         then validate_range         value, constraint
+      when :enum          then validate_enum          value, constraint
+      when :type          then validate_type          value, constraint
+      when :array_type    then validate_array_type    value, constraint
+      when :custom_type   then validate_custom_type   value, constraint
+      when :regexp        then validate_regexp        value, constraint
+      when :length        then validate_length        value, constraint
+      when :active_record then validate_active_record value, constraint
       else true
       end
       rescue
@@ -47,72 +47,90 @@ module Valideizer
 
     private
 
-    def validate_eql(param, constraint)
-      param == constraint
+    def validate_eql(value, constraint)
+      value == constraint
     end
 
-    def validate_gt(param, constraint)
-      param > constraint
+    def validate_gt(value, constraint)
+      value > constraint
     end
 
-    def validate_gte(param, constraint)
-      param >= constraint
+    def validate_gte(value, constraint)
+      value >= constraint
     end
 
-    def validate_lt(param, constraint)
-      param < constraint
+    def validate_lt(value, constraint)
+      value < constraint
     end
 
-    def validate_lte(param, constraint)
-      param <= constraint
+    def validate_lte(value, constraint)
+      value <= constraint
     end
 
-    def validate_ot(param, constraint)
-      param != constraint
+    def validate_ot(value, constraint)
+      value != constraint
     end
 
-    def validate_range(param, constraint)
+    def validate_range(value, constraint)
       raise 'Must be a range' unless constraint.is_a? Range
-      constraint.include? param
+      constraint.include? value
     end
 
-    def validate_enum(param, constraint)
+    def validate_enum(value, constraint)
       raise 'Must be an array' unless constraint.is_a? Array
-      constraint.include? param
+      constraint.include? value
     end
 
-    def validate_type(param, constraint)
+    def validate_type(value, constraint)
       if constraint.is_a? Array
-        constraint.each { |type| return true if type_check(param, type)}
+        constraint.each { |type| return true if type_check(value, type)}
       else
-        type_check(param, constraint)
+        type_check(value, constraint)
       end
     end
 
-    def type_check(param, type)
+    def type_check(value, type)
       case type
-      when :integer then param.is_a? Integer
-      when :float   then param.is_a? Float
-      when :string  then param.is_a? String
-      when :array   then param.is_a? Array
-      when :hash    then param.is_a? Hash
-      when :bool    then bool_check(param)
-      when :json    then json_check(param)
-      else raise "Wrong check type #{param}"
+      when :string  then value.is_a? String
+      when :array   then value.is_a? Array
+      when :hash    then value.is_a? Hash
+      when :integer then integer_check(value)
+      when :float   then float_check(value)
+      when :bool    then bool_check(value)
+      when :json    then json_check(value)
+      else raise "Wrong check type #{value}"
       end
     end
 
-    def bool_check(param)
-      [0, 1].include?(param) || ['true', 'false'].include?(param.to_s.downcase)
+    def integer_check(value)
+      casted_value = value.to_i rescue nil
+      if casted_value && (casted_value == 0 && value.to_s.strip == '0' || casted_value != 0)
+        true
+      else
+        false
+      end
     end
 
-    def json_check(param)
-      [Hash, Array].include?((JSON.parse param rescue nil).class)
+    def float_check(value)
+      casted_value = value.to_f rescue nil
+      if casted_value && (casted_value == 0 && value.to_s.strip == '0' || casted_value != 0)
+        true
+      else
+        false
+      end
     end
 
-    def validate_array_type(param, constraint)
-      if param.is_a? Array
-        param.each do  |v|
+    def bool_check(value)
+      ['0', '1'].include?(value.to_s.strip) || ['true', 'false'].include?(value.to_s.downcase.strip)
+    end
+
+    def json_check(value)
+      [Hash, Array].include?((JSON.parse value rescue nil).class)
+    end
+
+    def validate_array_type(value, constraint)
+      if value.is_a? Array
+        value.each do  |v|
           if v.is_a?(Array)
             validate_array_type(v, constraint)
           else
@@ -126,25 +144,25 @@ module Valideizer
       end
     end
 
-    def validate_regexp(param, regexp)
-      raise 'Must be a string' unless param.is_a? String
-      param.match? regexp
+    def validate_regexp(value, regexp)
+      raise 'Must be a string' unless value.is_a? String
+      value.match? regexp
     end
 
-    def validate_custom_type(param, constraint)
-      param.is_a? constraint
+    def validate_custom_type(value, constraint)
+      value.is_a? constraint
     end
 
-    def validate_length(param, constraint)
-      if [Array, Hash, String].include? param.class
+    def validate_length(value, constraint)
+      if [Array, Hash, String].include? value.class
         if constraint.is_a? Hash
           raise 'Hash params can not be empty.' if constraint.empty?
           res = true
-          res &= param.length >= constraint[:min] unless constraint[:min].nil?
-          res &= param.length <= constraint[:max] unless constraint[:max].nil?
+          res &= value.length >= constraint[:min] unless constraint[:min].nil?
+          res &= value.length <= constraint[:max] unless constraint[:max].nil?
           res
         elsif constraint.is_a? Range
-          constraint.include? param.length
+          constraint.include? value.length
         else
           raise 'Wrong constraint for :length option. Must be range or hash {min: 0, max: 10}'
         end
@@ -153,10 +171,10 @@ module Valideizer
       end
     end
 
-    def validate_active_record(param, constraint)
+    def validate_active_record(value, constraint)
         klass = constraint
         if klass.is_a? ActiveModel || (klass = constraint.to_s.constantize).is_a?(ActiveModel)
-          klass.find_by_id(param).present?
+          klass.find_by_id(value).present?
         else
           raise "#{constraint} is not a valid ActiveRecord model"
        end

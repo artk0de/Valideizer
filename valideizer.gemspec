@@ -17,7 +17,7 @@ Gem::Specification.new do |spec|
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
   spec.files         = %w(lib/valideizer.rb lib/valideizer/core.rb lib/valideizer/rails.rb lib/valideizer/error_printer.rb  lib/valideizer/rules.rb
-                          lib/valideizer/version.rb lib/valideizer/holder.rb)
+                          lib/valideizer/version.rb lib/valideizer/holder.rb lib/valideizer/caster.rb)
   spec.bindir        = "exe"
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]

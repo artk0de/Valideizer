@@ -1,9 +1,11 @@
 require 'valideizer/rules'
 require 'valideizer/error_printer'
+require 'valideizer/caster'
 
 module Valideizer
   class Core
     include Valideizer::Rules
+    include Valideizer::Caster
     include Valideizer::ErrorPrinter
 
     def initialize
@@ -20,6 +22,7 @@ module Valideizer
     def valideized?(params)
       reinit_errrors
       setup_defaults(params)
+
       params.each do |param, value|
         next unless nil_check(param, value)
         @rules[param.to_s].each do |type, constraint|
@@ -32,7 +35,7 @@ module Valideizer
       end
 
       if @errors.empty?
-        type_cast params if @type_cast
+        recast(params)
         true
       else
         false
@@ -85,6 +88,30 @@ module Valideizer
     def has_allow_nil_rule(param)
       nil_rule = @rules[param.to_s]&.find { |r, _c| r == :nil }
       nil_rule.nil? ? false : nil_rule.last
+    end
+
+    def recast(params)
+      @rules.each do |param, rules|
+        next if params[param.to_s].nil? && params[param.to_sym].nil?
+
+        type_rule = rules.find { |r, _c| r == :type }
+
+        if type_rule
+          constraint = type_rule.last
+          param = param.to_sym if params.include? param.to_sym
+          value = params[param]
+
+          if validate(value, :type, constraint)
+            params[param] = case constraint
+                            when :json    then cast_from_json  value
+                            when :bool    then cast_to_bool    value
+                            when :float   then cast_to_float   value
+                            when :integer then cast_to_integer value
+                            else value
+                            end
+          end
+        end
+      end
     end
 
     def build_error_messages

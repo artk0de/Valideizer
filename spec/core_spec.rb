@@ -3,6 +3,7 @@ require_relative 'spec_helper.rb'
 RSpec.describe Valideizer::Core do
   let(:valideizer)   { Valideizer::Core.new }
   let(:valideizer_2) { Valideizer::Core.new }
+  let(:valideizer_r) { Valideizer::Core.new }
 
   describe '#valideize?' do
     before do
@@ -52,14 +53,11 @@ RSpec.describe Valideizer::Core do
         a: -34,
         b: 'fivesixseveneightnine',
         c: 'some',
-        d: [1, 2, 3, "4"],
+        d: [1, 2, 3, "asd"],
         e: 4
       }
 
       valideizer.valideized? params
-      errors =  valideizer.errors
-      errors
-
       expect(valideizer.errors.count).to eq(5)
     end
 
@@ -75,6 +73,20 @@ RSpec.describe Valideizer::Core do
       valideizer_2.valideized? params
 
       expect(params).to eq(a: 10, b: 'default')
+    end
+
+    it 'Recasts params' do
+      valideizer_r.add_rule(:a, type: :integer)
+      valideizer_r.add_rule(:b, type: :json)
+      valideizer_r.add_rule(:c, type: :bool)
+
+      params = {
+        a: "1",
+        b: "[1,2,3]",
+        c: "false"
+      }
+      valideizer_r.valideized? params
+      expect(params).to eq(a: 1, b: [1,2,3], c: false)
     end
   end
 end
