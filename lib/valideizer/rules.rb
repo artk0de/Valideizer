@@ -48,27 +48,35 @@ module Valideizer
     private
 
     def validate_eql(value, constraint)
-      value == constraint
+      if constraint.is_a? Numeric
+        value.to_f == constraint
+      else
+        value == constraint
+      end
     end
 
     def validate_gt(value, constraint)
-      value > constraint
+      value.to_f > constraint
     end
 
     def validate_gte(value, constraint)
-      value >= constraint
+      value.to_f >= constraint
     end
 
     def validate_lt(value, constraint)
-      value < constraint
+      value.to_f < constraint
     end
 
     def validate_lte(value, constraint)
-      value <= constraint
+      value.to_f <= constraint
     end
 
     def validate_ot(value, constraint)
-      value != constraint
+      if constraint.is_a? Numeric
+        value.to_f != constraint
+      else
+        value != constraint
+      end
     end
 
     def validate_range(value, constraint)
