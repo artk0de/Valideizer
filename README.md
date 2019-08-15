@@ -1,6 +1,8 @@
 # Valideizer
+[![Gem Version](https://badge.fury.io/rb/valideizer.svg)](https://badge.fury.io/rb/valideizer)
 
 **Valideizer** is a very simple tool for passing parameters. Ideally for REST.
+
 
 ## Installation
 
@@ -204,6 +206,60 @@ Or you can use *Valideizer* without callbacks, by processing validation errors m
 | :hash | Hash
 | :json | JSON object
 
+### Params auto-casting
+
+If validation rule contains "type" param then corresponding value in valideized parameters will be automatically casted to nested type.
+
+```ruby
+ valideizer.valideize :a, type: :float
+ valideizer.valideize :b, type: :bool
+ valideizer.valideize :a, type: :json
+ 
+params = {
+  a: "44",
+  b: "false",
+  c: "[1,2,3]"
+}
+  
+ 
+ valideizer.valideized? params
+ 
+ params # { a: 44.0, b: false, c: [1,2,3] }
+```
+
+### Regexp params substitution
+
+If regexp rule contains groups or named groups corresponding values will be substituted by matched groups. Please use common or named captures separately.
+```ruby
+
+group_regexp   = /(\d{1,2}.\d{1,2}.\d{4})-(\d{1,2}.\d{1,2}.\d{4})/ # Several capture groups
+named_regexp   = /(?<start_date>\d{1,2}.\d{1,2}.\d{4})-(?<end_date>\d{1,2}.\d{1,2}.\d{4})/ # Named captures
+single_capture = /(\d{1,2}.\d{1,2}.\d{4})-\d{1,2}.\d{1,2}.\d{4}/ # Only 1 capture group
+
+valideizer.valideize :groups, regexp: group_regexp
+valideizer.valideize :named_groups, regexp: named_regexp
+valideizer.valideize :single_capture, regexp: single_capture
+
+params = {
+  groups: "23.05.1995-23.05.2105",
+  named_groups: "23.05.1995-23.05.2105",
+  single_capture: "23.05.1995-23.05.2105"
+}
+
+valideizer.valideized? params
+
+params[:groups][0] # => 23.05.1995
+params[:groups][1] # => 23.05.2105
+
+params[:named_groups][:start_date] # => 23.05.1995
+params[:named_groups][:end_date] # => 23.05.2105
+
+params[:single_capture] # => 23.05.1995
+```
+
+## Change log
+
+Please view [CHANGE_LOG](CHANGE_LOG.md).
 
 ## Contributing
 

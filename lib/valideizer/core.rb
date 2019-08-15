@@ -20,8 +20,7 @@ module Valideizer
     alias valideize add_rule
 
     def valideized?(params)
-      reinit_errrors
-      setup_defaults(params)
+      pre_process params
 
       params.each do |param, value|
         next unless nil_check(param, value)
@@ -35,7 +34,7 @@ module Valideizer
       end
 
       if @errors.empty?
-        recast(params)
+        post_process params
         true
       else
         false
@@ -48,6 +47,11 @@ module Valideizer
     end
 
     private
+
+    def pre_process(params)
+      reinit_errrors
+      setup_defaults params
+    end
 
     def reinit_errrors
       @errors = {}
@@ -90,28 +94,44 @@ module Valideizer
       nil_rule.nil? ? false : nil_rule.last
     end
 
-    def recast(params)
-      @rules.each do |param, rules|
-        next if params[param.to_s].nil? && params[param.to_sym].nil?
+    def post_process(params)
+      @rules.each do |key, rules|
+        next if params[key.to_s].nil? && params[key.to_sym].nil?
+        key = key.to_sym if params.include? key.to_sym
 
         type_rule = rules.find { |r, _c| r == :type }
+        recast(params, key, type_rule.last) if type_rule
 
-        if type_rule
-          constraint = type_rule.last
-          param = param.to_sym if params.include? param.to_sym
-          value = params[param]
-
-          if validate(value, :type, constraint)
-            params[param] = case constraint
-                            when :json    then cast_from_json  value
-                            when :bool    then cast_to_bool    value
-                            when :float   then cast_to_float   value
-                            when :integer then cast_to_integer value
-                            else value
-                            end
-          end
-        end
+        regexp_rule = rules.find { |r, _c| r == :regexp }
+        regexp_groups_substitution(params, key, regexp_rule.last) if regexp_rule
       end
+    end
+
+
+    def recast(params, key, type)
+      value = params[key]
+      params[key] = case type
+                    when :json    then cast_from_json value
+                    when :bool    then cast_to_bool value
+                    when :float   then cast_to_float value
+                    when :integer then cast_to_integer value
+                    else value
+                    end
+    end
+
+    def regexp_groups_substitution(params, key, regexp)
+      value = params[key]
+
+      matched = value.match regexp
+      return if matched.nil?
+
+      params[key] = if matched.named_captures.any?
+                      matched.named_captures
+                    elsif matched.captures.count > 1
+                      matched.captures
+                    elsif matched.captures.count == 1
+                      matched.captures[0]
+                    end
     end
 
     def build_error_messages

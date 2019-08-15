@@ -4,6 +4,7 @@ RSpec.describe Valideizer::Core do
   let(:valideizer)   { Valideizer::Core.new }
   let(:valideizer_2) { Valideizer::Core.new }
   let(:valideizer_r) { Valideizer::Core.new }
+  let(:valideizer_3) { Valideizer::Core.new }
 
   describe '#valideize?' do
     before do
@@ -87,6 +88,33 @@ RSpec.describe Valideizer::Core do
       }
       valideizer_r.valideized? params
       expect(params).to eq(a: 1, b: [1,2,3], c: false)
+    end
+
+    it 'Substitute matched regexep params' do
+      group_regexp = /(\d{1,2}.\d{1,2}.\d{4})-(\d{1,2}.\d{1,2}.\d{4})/
+      named_regexp = /(?<start_date>\d{1,2}.\d{1,2}.\d{4})-(?<end_date>\d{1,2}.\d{1,2}.\d{4})/
+      single_capture = /(\d{1,2}.\d{1,2}.\d{4})-\d{1,2}.\d{1,2}.\d{4}/
+
+      valideizer_3.add_rule :group, regexp: group_regexp
+      valideizer_3.add_rule :named_group, regexp: named_regexp
+      valideizer_3.add_rule :single_capture, regexp: single_capture
+
+      params = {
+        group: "11.09.2001-11.09.2017",
+        named_group: "11.09.2001-11.09.2017",
+        single_capture: "11.09.2001-11.09.2017"
+      }
+
+      valideizer_3.valideized? params
+
+      puts params
+      expect(params[:group][0]).to eq "11.09.2001"
+      expect(params[:group][1]).to eq "11.09.2017"
+
+      expect(params[:named_group]['start_date']).to eq "11.09.2001"
+      expect(params[:named_group]['end_date']).to eq "11.09.2017"
+
+      expect(params[:single_capture]).to eq "11.09.2001"
     end
   end
 end

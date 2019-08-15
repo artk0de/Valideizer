@@ -181,7 +181,7 @@ module Valideizer
 
     def validate_active_record(value, constraint)
         klass = constraint
-        if klass.is_a? ActiveModel || (klass = constraint.to_s.constantize).is_a?(ActiveModel)
+        if klass.is_a?(Class) && klass.ancestors.include?(ActiveRecord::Base)
           klass.find_by_id(value).present?
         else
           raise "#{constraint} is not a valid ActiveRecord model"
