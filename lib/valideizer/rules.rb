@@ -1,26 +1,8 @@
 require 'json'
+require 'time'
 
 module Valideizer
   module Rules
-    RULES = %i[
-      eql
-      gt
-      gte
-      lt
-      lte
-      ot
-      range
-      enum
-      type
-      array_type
-      custom_type
-      active_record
-      length
-      regexp
-      nil
-      default
-    ]
-
     def validate(value, rule, constraint)
       begin
       case rule
@@ -38,6 +20,7 @@ module Valideizer
       when :regexp        then validate_regexp        value, constraint
       when :length        then validate_length        value, constraint
       when :active_record then validate_active_record value, constraint
+      when :format        then validate_time_format   value, constraint
       else true
       end
       rescue
@@ -99,15 +82,21 @@ module Valideizer
 
     def type_check(value, type)
       case type
-      when :string  then value.is_a? String
-      when :array   then value.is_a? Array
-      when :hash    then value.is_a? Hash
-      when :integer then integer_check(value)
-      when :float   then float_check(value)
-      when :bool    then bool_check(value)
-      when :json    then json_check(value)
+      when :string   then value.is_a? String
+      when :array    then value.is_a? Array
+      when :hash     then value.is_a? Hash
+      when :integer  then integer_check(value)
+      when :float    then float_check(value)
+      when :boolean  then boolean_check(value)
+      when :json     then json_check(value)
+      when :datetime then date_time_check(value)
       else raise "Wrong check type #{value}"
       end
+    end
+
+    def date_time_check(value)
+      Time.parse(value) rescue return(false)
+      true
     end
 
     def integer_check(value)
@@ -128,7 +117,7 @@ module Valideizer
       end
     end
 
-    def bool_check(value)
+    def boolean_check(value)
       ['0', '1'].include?(value.to_s.strip) || ['true', 'false'].include?(value.to_s.downcase.strip)
     end
 
@@ -186,6 +175,11 @@ module Valideizer
         else
           raise "#{constraint} is not a valid ActiveRecord model"
        end
+    end
+
+    def validate_time_format(value, constraint)
+      Time.strptime(value, constraint) rescue return(false)
+      true
     end
   end
 end

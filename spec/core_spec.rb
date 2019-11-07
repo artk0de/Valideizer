@@ -1,10 +1,12 @@
 require_relative 'spec_helper.rb'
 
 RSpec.describe Valideizer::Core do
-  let(:valideizer)   { Valideizer::Core.new }
-  let(:valideizer_2) { Valideizer::Core.new }
-  let(:valideizer_r) { Valideizer::Core.new }
-  let(:valideizer_3) { Valideizer::Core.new }
+  let(:valideizer)                { Valideizer::Core.new }
+  let(:valideizer_2)              { Valideizer::Core.new }
+  let(:valideizer_r)              { Valideizer::Core.new }
+  let(:valideizer_3)              { Valideizer::Core.new }
+  let(:valideizer_date)           { Valideizer::Core.new }
+  let(:valideizer_date_formatted) { Valideizer::Core.new }
 
   describe '#valideize?' do
     before do
@@ -79,7 +81,7 @@ RSpec.describe Valideizer::Core do
     it 'Recasts params' do
       valideizer_r.add_rule(:a, type: :integer)
       valideizer_r.add_rule(:b, type: :json)
-      valideizer_r.add_rule(:c, type: :bool)
+      valideizer_r.add_rule(:c, type: :boolean)
 
       params = {
         a: "1",
@@ -88,6 +90,21 @@ RSpec.describe Valideizer::Core do
       }
       valideizer_r.valideized? params
       expect(params).to eq(a: 1, b: [1,2,3], c: false)
+    end
+
+    it 'Validates and recasts datetime' do
+      valideizer_r.clean!
+      valideizer_r.add_rule(:time, type: :datetime)
+      valideizer_r.add_rule(:time_w_format, datetime: '%d.%m.%Y')
+
+      params = {
+        time: '23.05.1995',
+        time_w_format: '23.05.1995'
+      }
+
+      expect(valideizer_r.valideized?(params)).to be(true)
+      expect(params[:time].class).to be(Time)
+      expect(params[:time_w_format].class).to be(Time)
     end
 
     it 'Substitute matched regexep params' do
@@ -107,7 +124,6 @@ RSpec.describe Valideizer::Core do
 
       valideizer_3.valideized? params
 
-      puts params
       expect(params[:group][0]).to eq "11.09.2001"
       expect(params[:group][1]).to eq "11.09.2017"
 
@@ -115,6 +131,20 @@ RSpec.describe Valideizer::Core do
       expect(params[:named_group]['end_date']).to eq "11.09.2017"
 
       expect(params[:single_capture]).to eq "11.09.2001"
+    end
+
+    it 'Validates unformatted date' do
+      valideizer_date.add_rule :date, type: :datetime
+      params = { date: '23.05.1995' }
+
+      expect(valideizer_date.valideized?(params)).to be true
+    end
+
+    it 'Validates formatted date' do
+      valideizer_date.add_rule :date, type: :datetime, format: '%d.%m.%YT%H:%M:%s'
+      params = { date: '23.05.1995T09:03:00' }
+
+      expect(valideizer_date.valideized?(params)).to be(true)
     end
   end
 end

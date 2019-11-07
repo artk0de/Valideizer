@@ -1,3 +1,5 @@
+require 'time'
+
 module Valideizer
   module Caster
     def cast_from_json(value)
@@ -12,9 +14,20 @@ module Valideizer
       value.to_f rescue nil
     end
 
-    def cast_to_bool(value)
-      return false if ['0', 'false'].include? value.to_s.downcase
-      return true  if ['1', 'true'].include? value.to_s.downcase
+    def cast_to_time(value)
+      Time.parse(value) rescue nil
+    end
+
+    def cast_to_time_with_format(value, format)
+      Time.strptime(value, format) rescue nil
+    end
+
+    def cast_to_boolean(value)
+      if %w(1 true).include?(value.to_s.downcase)
+        true
+      elsif %w(0 false).include?(value.to_s.downcase)
+        false
+      end
     end
   end
 end

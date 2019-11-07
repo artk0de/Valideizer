@@ -26,7 +26,8 @@ module Valideizer
       when :regexp        then "Couldn't be matched by #{constraint}."
       when :length        then "Length must be #{constraint}. Current value: `#{value}`, length: #{value.length}."
       when :active_record then "Couldn't find #{constraint} with ID=#{value}."
-      when :nil           then "Can not be nil or empty."
+      when :null          then "Can not be nil or empty."
+      when :format        then "Don't match current time pattern #{constraint}"
       else ''
       end
     end

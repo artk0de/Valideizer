@@ -48,7 +48,7 @@ Get errors or error messages.
 ```ruby
  params = {
   a: -1,
-  b: "jesu",
+  b: "jesus",
   c: 42,
   d: [6, 6, 6],
   e: :one,
@@ -77,6 +77,7 @@ Get errors or error messages.
 
 *Valideizer* gem is fully adopted to work with Rails controllers. If validation callback fails then it redirects to :valideizer_callback with errors in *params*
 
+#### 1st way
 
 ```ruby
 class SampleController < ApplicationController
@@ -100,7 +101,7 @@ class SampleController < ApplicationController
         render json: Jesus.new.to_json 
       end
       
-      valideize :help_us do
+      valideize :help_us, :please do
         valideize :a, type: :integer, lt: 666
         valideize :b, type: :string, nil: true
         valideize :c, type: :json
@@ -111,6 +112,10 @@ class SampleController < ApplicationController
       # 
       def help_us
          render json: Apocalypse.new.to_json
+      end
+      
+      def please
+        #pleeaase
       end
       
       # Define your callback with 1 parameter for errors
@@ -128,6 +133,26 @@ In your *routes.rb*
     get '/validation_errors' => 'Sample#errors_callback'
   end
 ```
+
+#### 2nd way
+
+```ruby
+class SampleController < ApplicationController
+      include Valideizer::Rails
+      valideizer_render do |errors|
+            {
+              errors: errors,
+              meta: {
+                errors_count: errors.count,
+                success: false
+              }
+            }
+          end
+      
+    end
+```
+
+#### 3rd way
 
 Or you can use *Valideizer* without callbacks, by processing validation errors manually
 
@@ -173,6 +198,8 @@ Or you can use *Valideizer* without callbacks, by processing validation errors m
     end
 ```
 
+**IMPORTANT!** Use just **one** of this use-ways.
+
 ## Available options
 
 | Option | Arguements | Description  |
@@ -193,6 +220,7 @@ Or you can use *Valideizer* without callbacks, by processing validation errors m
 | :length |  Range(m..n) or <br> { min: m, max: n } |  Length constraints for Arrays, Hashes and Strings
 | :regexp |  / Regexp /|  Checks regular expression.
 | :active_record |  :model_name or *Model* | Validates record existence for AR models. Only if parameter is ID for some AR-model.
+| :format | format pattern | Validates datetime string by pattern. You could find avalaible patterns [here](https://ruby-doc.org/stdlib-2.6.4/libdoc/time/rdoc/Time.html#strptime-method).
 
 
 ### Available types
@@ -200,11 +228,12 @@ Or you can use *Valideizer* without callbacks, by processing validation errors m
 | ---- | ----------- |
 | :integer | Integer number
 | :float | Float number
-| :string | Float number
+| :string | String
 | :bool | Boolean
 | :array | Array
 | :hash | Hash
 | :json | JSON object
+| :datetime| String with valid date or time
 
 ### Params auto-casting
 
@@ -225,6 +254,11 @@ params = {
  valideizer.valideized? params
  
  params # { a: 44.0, b: false, c: [1,2,3] }
+```
+
+You also could disable parameters auto-casting by
+```ruby
+Valideizer::Core.new(autocast: false)
 ```
 
 ### Regexp params substitution

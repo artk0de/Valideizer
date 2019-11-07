@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    valideizer (1.1.8)
+    valideizer (1.2.0)
 
 GEM
   remote: https://rubygems.org/

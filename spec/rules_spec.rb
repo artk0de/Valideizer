@@ -78,5 +78,14 @@ RSpec.describe Valideizer::Rules do
       expect(valideizer.validate('abcd', :regexp, /[a-zA-z]{4}/)).to be true
       expect(valideizer.validate('1bcd', :regexp, /[a-zA-z]{4}/)).to be false
     end
+
+    it 'Tests :dates' do
+      expect(valideizer.validate('23.05.1995', :datetime, '%d.%m.%Y')).to be true
+      expect(valideizer.validate('23.05.1995T09:00:00', :datetime, '%d.%m.%YT%H:%M:%s')).to be true
+      expect(valideizer.validate('05.23.1995T09:03:00', :datetime, '%d.%m.%YT%H:%M:%s')).to be false
+
+      expect(valideizer.validate('23.05.1995', :type, :datetime)).to be true
+      expect(valideizer.validate('Not a date', :type, :datetime)).to be false
+    end
   end
 end
