@@ -221,6 +221,7 @@ Or you can use *Valideizer* without callbacks, by processing validation errors m
 | :regexp |  / Regexp /|  Checks regular expression.
 | :active_record |  :model_name or *Model* | Validates record existence for AR models. Only if parameter is ID for some AR-model.
 | :format | format pattern | Validates datetime string by pattern. You could find avalaible patterns [here](https://ruby-doc.org/stdlib-2.6.4/libdoc/time/rdoc/Time.html#strptime-method).
+| :unique | Boolean (**False** default) | Validates uniqueness of Array's elements.
 
 
 ### Available types

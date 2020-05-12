@@ -1,4 +1,9 @@
-##### v 1.2.1 (**11-07-2019**)
+##### v 1.2.2 (**5-13-2019**)
+* Added :enum check for arrays.
+* Added :unique parameter for arrays.
+* Time string now casts to **DateTime**.
+
+##### v 1.2.1 (**7-11-2019**)
 **Core**
 * Small bug fix with unimported file in gemspec.
 * Added :datetime type.
@@ -14,11 +19,11 @@
 * Added **valideizer_render** method.
 * Added multiparams passing to in-class **valideize** method.
 
-##### v 1.1.9 (**08-15-2019**)
+##### v 1.1.9 (**15-8-2019**)
 
 * Added regexp capture groups auto-substitution.
 
-##### v 1.1.8 (**08-14-2019**)
+##### v 1.1.8 (**14-8-2019**)
 
 * ActiveRecord ID check fixed.
 

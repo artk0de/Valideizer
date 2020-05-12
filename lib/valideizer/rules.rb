@@ -1,5 +1,5 @@
 require 'json'
-require 'time'
+require 'date'
 
 module Valideizer
   module Rules
@@ -21,6 +21,7 @@ module Valideizer
       when :length        then validate_length        value, constraint
       when :active_record then validate_active_record value, constraint
       when :format        then validate_time_format   value, constraint
+      when :unique        then validate_unique        value, constraint
       else true
       end
       rescue
@@ -69,7 +70,7 @@ module Valideizer
 
     def validate_enum(value, constraint)
       raise 'Must be an array' unless constraint.is_a? Array
-      constraint.include? value
+      value.is_a?(Array) ? value.all? { |v| constraint.include?(v) } : constraint.include?(value)
     end
 
     def validate_type(value, constraint)
@@ -95,7 +96,7 @@ module Valideizer
     end
 
     def date_time_check(value)
-      Time.parse(value) rescue return(false)
+      DateTime.parse(value) rescue return(false)
       true
     end
 
@@ -178,8 +179,17 @@ module Valideizer
     end
 
     def validate_time_format(value, constraint)
-      Time.strptime(value, constraint) rescue return(false)
+      DateTime.strptime(value, constraint) rescue return(false)
       true
+    end
+
+    def validate_unique(value, constraint = true)
+      if constraint
+        raise "#{value} isn't Array." unless value.is_a?(Array)
+        value.count == value.uniq.count
+      else
+        true
+      end
     end
   end
 end

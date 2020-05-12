@@ -1,4 +1,4 @@
-require 'time'
+require 'date'
 
 module Valideizer
   module Caster
@@ -15,11 +15,11 @@ module Valideizer
     end
 
     def cast_to_time(value)
-      Time.parse(value) rescue nil
+      DateTime.parse(value) rescue nil
     end
 
     def cast_to_time_with_format(value, format)
-      Time.strptime(value, format) rescue nil
+      DateTime.strptime(value, format) rescue nil
     end
 
     def cast_to_boolean(value)

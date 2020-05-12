@@ -30,7 +30,7 @@ module Valideizer
       json:     %i[null default],
       boolean:  %i[null default],
       hash:     %i[null default length],
-      array:    %i[null default length],
+      array:    %i[null default length enum uniq],
     }.freeze
 
     def check_rule_set(rules)
