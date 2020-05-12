@@ -142,9 +142,9 @@ RSpec.describe Valideizer::Core do
 
     it 'Validates formatted date' do
       valideizer_date.add_rule :date, type: :datetime, format: '%d.%m.%YT%H:%M:%s'
-      params = { date: '23.05.1995T09:03:00' }
 
-      expect(valideizer_date.valideized?(params)).to be(true)
+      expect(valideizer_date.valideized?({ date: '23.05.1995T09:03:00' })).to be_truthy
+      expect(valideizer_date.valideized?({ date: '05.23.1995T09:03:00' })).to be_falsey
     end
   end
 end
